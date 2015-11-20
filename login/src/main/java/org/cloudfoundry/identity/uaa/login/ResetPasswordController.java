@@ -41,6 +41,8 @@ import org.thymeleaf.context.Context;
 
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Controller
@@ -166,6 +168,7 @@ public class ResetPasswordController {
             Timestamp fiveMinutes = new Timestamp(System.currentTimeMillis()+(1000*60*5));
             model.addAttribute("code", codeStore.generateCode(expiringCode.getData(), fiveMinutes).getCode());
             model.addAttribute("email", email);
+            model.addAttribute("passwordPolicy", resetPasswordService.getPasswordPolicy());
             return "reset_password";
         }
     }
