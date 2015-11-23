@@ -41,8 +41,6 @@ import org.thymeleaf.context.Context;
 
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 @Controller

@@ -3,12 +3,32 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorator="layouts/main"
       th:with="pivotal=${@environment.getProperty('login.brand') == 'pivotal'},isUaa=${T(org.cloudfoundry.identity.uaa.zone.IdentityZoneHolder).isUaa()}">
+<head>
+    <th:block layout:include="pw_validation :: deps"></th:block>
+    <th:block layout:include="pw_validation :: head"></th:block>
+</head>
 <div class="island-landscape" layout:fragment="page-content">
     <div class="island-title">
         <h1>Create your <th:block th:text="${pivotal and isUaa ? 'Pivotal ID' : 'account'}">account</th:block></h1>
         <p th:if="${pivotal and isUaa}">A <strong>Pivotal ID</strong> lets you sign in to many Pivotal products using a single username and password.</p>
     </div>
     <div class="island-content">
+        <script th:inline="javascript">
+        /*<![CDATA[*/
+        $(document).ready(function(){
+            // Get all the password policy requirements.
+            // In case the policy equals to null, initialize the values to 0.
+            var special_count = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getRequireSpecialCharacter()}]]*/;
+            var uppercase_count = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getRequireUpperCaseCharacter()}]]*/;
+            var lowercase_count = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getRequireLowerCaseCharacter()}]]*/;
+            var number_count = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getRequireDigit()}]]*/;
+            var length_count = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getMinLength()}]]*/;
+            validate_password(special_count, uppercase_count, lowercase_count,
+                              number_count, length_count, 'password',
+                              'password_confirmation');
+        });
+        /*]]>*/
+        </script>
         <div th:text="|Email: ${email}|" th:unless="${error_message_code == 'code_expired'}" class="email-display">Email: user@example.com</div>
         <div th:if="${error_message_code}" class="alert alert-error">
             <p th:text="#{'account_activation.' + ${error_message_code}}">Error Message</p>
@@ -22,7 +42,9 @@
                 <input name="client_id" type="hidden" value="login" th:value="${client_id}"/>
                 <input name="code" type="hidden" value="code" th:value="${code}"/>
                 <input name="password" type="password" placeholder="Password" autocomplete="off" class="form-control"/>
+                <th:block layout:include="pw_validation :: pw_requirements"></th:block>
                 <input name="password_confirmation" type="password" placeholder="Confirm" autocomplete="off" class="form-control"/>
+                <th:block layout:include="pw_validation :: pw_confirm-req"></th:block>
                 <input name="redirect_uri" type="hidden" th:value="${redirect_uri}"/>
                 <input type="submit" th:value="${pivotal and isUaa ? 'Create Pivotal ID' : 'Create account'}" class="island-button"/>
             </form>

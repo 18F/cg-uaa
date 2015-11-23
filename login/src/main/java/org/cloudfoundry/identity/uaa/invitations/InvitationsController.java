@@ -137,6 +137,7 @@ public class InvitationsController {
                 SecurityContextHolder.getContext().setAuthentication(token);
                 model.addAttribute(Origin.UAA, Arrays.asList(provider));
                 model.addAttribute("code", newCode);
+                model.addAttribute("passwordPolicy", passwordValidator.getPasswordPolicy());
                 logger.debug(String.format("Sending user to accept invitation page email:%s, id:%s", codeData.get("email"), codeData.get("user_id")));
             }
             model.addAllAttributes(codeData);

@@ -8967,6 +8967,7 @@ h1 {
   border:1px solid #ddd;
   margin-bottom: 15px;
   display: none;
+  text-align: center;
 }
 
 .password-req-box::before {
