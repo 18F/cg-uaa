@@ -19,10 +19,10 @@
             // In case the policy equals to null, initialize the values to 0.
             var specialCount = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getRequireSpecialCharacter()}]]*/;
             var uppercaseCount = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getRequireUpperCaseCharacter()}]]*/;
-            var uppercaseCount = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getRequireLowerCaseCharacter()}]]*/;
+            var lowercaseCount = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getRequireLowerCaseCharacter()}]]*/;
             var numberCount = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getRequireDigit()}]]*/;
             var lengthCount = /*[[${passwordPolicy == null ? 0 : passwordPolicy.getMinLength()}]]*/;
-            validatePassword(specialCount, uppercaseCount, uppercaseCount,
+            validatePassword(specialCount, uppercaseCount, lowercaseCount,
                               numberCount, lengthCount,
                               /*[[${passwordField}]]*/,
                               /*[[${confirmPasswordField}]]*/
