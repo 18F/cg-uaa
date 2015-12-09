@@ -46,6 +46,7 @@ public class EmailAccountCreationService implements AccountCreationService {
     private final ClientDetailsService clientDetailsService;
     private final PasswordValidator passwordValidator;
     private final String brand;
+    private final String brandTitle;
     private final UaaUrlUtils uaaUrlUtils;
 
     public EmailAccountCreationService(
@@ -56,7 +57,8 @@ public class EmailAccountCreationService implements AccountCreationService {
             ClientDetailsService clientDetailsService,
             PasswordValidator passwordValidator,
             UaaUrlUtils uaaUrlUtils,
-            String brand) {
+            String brand,
+            String brandTitle) {
 
         this.templateEngine = templateEngine;
         this.messageService = messageService;
@@ -66,6 +68,7 @@ public class EmailAccountCreationService implements AccountCreationService {
         this.passwordValidator = passwordValidator;
         this.uaaUrlUtils = uaaUrlUtils;
         this.brand = brand;
+        this.brandTitle = brandTitle;
     }
 
     @Override
@@ -188,7 +191,8 @@ public class EmailAccountCreationService implements AccountCreationService {
     }
 
     private String getSubjectText() {
-        return brand.equals("pivotal") && IdentityZoneHolder.isUaa() ? "Activate your Pivotal ID" : "Activate your account";
+        return brand.equals("pivotal") && IdentityZoneHolder.isUaa() ? "Activate your Pivotal ID" :
+                (brandTitle == null ?  "Activate your account" : "Activate your " + brandTitle + " account");
     }
 
     private String getEmailHtml(String code, String email) {
@@ -196,7 +200,8 @@ public class EmailAccountCreationService implements AccountCreationService {
 
         final Context ctx = new Context();
         if (IdentityZoneHolder.isUaa()) {
-            ctx.setVariable("serviceName", brand.equals("pivotal") ? "Pivotal" : "Cloud Foundry");
+            ctx.setVariable("serviceName", brand.equals("pivotal") ? "Pivotal" :
+                                ((brandTitle == null) ?  "Cloud Foundry": brandTitle));
         } else {
             ctx.setVariable("serviceName", IdentityZoneHolder.get().getName());
         }

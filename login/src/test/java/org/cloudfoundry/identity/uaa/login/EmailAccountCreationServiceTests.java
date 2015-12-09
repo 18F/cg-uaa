@@ -85,13 +85,13 @@ public class EmailAccountCreationServiceTests {
         clientDetailsService = mock(ClientDetailsService.class);
         details = mock(ClientDetails.class);
         passwordValidator = mock(PasswordValidator.class);
-        emailAccountCreationService = initEmailAccountCreationService("pivotal");
+        emailAccountCreationService = initEmailAccountCreationService("pivotal", null);
     }
 
-    private EmailAccountCreationService initEmailAccountCreationService(String brand) {
+    private EmailAccountCreationService initEmailAccountCreationService(String brand, String brandTitle) {
         return new EmailAccountCreationService(templateEngine, messageService, codeStore,
             scimUserProvisioning, clientDetailsService, passwordValidator, new UaaUrlUtils("http://uaa.example.com"),
-            brand);
+            brand, brandTitle);
     }
 
     @After
@@ -137,7 +137,7 @@ public class EmailAccountCreationServiceTests {
 
     @Test
     public void testBeginActivationWithOssBrand() throws Exception {
-        emailAccountCreationService = initEmailAccountCreationService("oss");
+        emailAccountCreationService = initEmailAccountCreationService("oss", null);
         String data = setUpForSuccess(null);
         when(scimUserProvisioning.createUser(any(ScimUser.class), anyString())).thenReturn(user);
         when(codeStore.generateCode(eq(data), any(Timestamp.class))).thenReturn(code);
@@ -149,6 +149,42 @@ public class EmailAccountCreationServiceTests {
         assertThat(emailBody, containsString("an account"));
         assertThat(emailBody, containsString("<a href=\"http://uaa.example.com/verify_user?code=the_secret_code&amp;email=user%40example.com\">Activate your account</a>"));
         assertThat(emailBody, not(containsString("Pivotal")));
+    }
+
+    @Test
+    public void testBeginActivationWithOssBrandWithBrandTitle() throws Exception {
+        String brandTitle = "Custom Brand";
+        emailAccountCreationService = initEmailAccountCreationService("oss", brandTitle);
+        String data = setUpForSuccess(null);
+        when(scimUserProvisioning.createUser(any(ScimUser.class), anyString())).thenReturn(user);
+        when(codeStore.generateCode(eq(data), any(Timestamp.class))).thenReturn(code);
+
+        emailAccountCreationService.beginActivation("user@example.com", "password", "login", null);
+
+        String emailBody = captorEmailBody("Activate your " + brandTitle + " account");
+
+        assertThat(emailBody, containsString("an account"));
+        assertThat(emailBody, containsString("<a href=\"http://uaa.example.com/verify_user?code=the_secret_code&amp;email=user%40example.com\">Activate your account</a>"));
+        assertThat(emailBody, not(containsString("Pivotal")));
+    }
+
+    @Test
+    public void testBeginActivationWithPivotalBrandWithBrandTitle() throws Exception {
+        String brandTitle = "Custom Brand";
+        emailAccountCreationService = initEmailAccountCreationService("pivotal", brandTitle);
+        String redirectUri = "";
+        String data = setUpForSuccess(redirectUri);
+        when(scimUserProvisioning.createUser(any(ScimUser.class), anyString())).thenReturn(user);
+        when(codeStore.generateCode(eq(data), any(Timestamp.class))).thenReturn(code);
+        emailAccountCreationService.beginActivation("user@example.com", "password", "login", redirectUri);
+
+        String emailBody = captorEmailBody("Activate your Pivotal ID");
+
+        assertThat(emailBody, containsString("a Pivotal ID"));
+        assertThat(emailBody, containsString("<a href=\"http://uaa.example.com/verify_user?code=the_secret_code&amp;email=user%40example.com\">Activate your account</a>"));
+        assertThat(emailBody, not(containsString("Cloud Foundry")));
+        // Should keep Pivotal branding in there.
+        assertThat(emailBody, not(containsString(brandTitle)));
     }
 
     @Test(expected = UaaException.class)
@@ -277,7 +313,7 @@ public class EmailAccountCreationServiceTests {
 
     @Test
     public void testResendVerificationCodeWithOssBrand() throws Exception {
-        emailAccountCreationService = initEmailAccountCreationService("oss");
+        emailAccountCreationService = initEmailAccountCreationService("oss", null);
         setUpResendCodeExpectations(setUpForSuccess(""));
 
         emailAccountCreationService.resendVerificationCode(user.getPrimaryEmail(), details.getClientId());

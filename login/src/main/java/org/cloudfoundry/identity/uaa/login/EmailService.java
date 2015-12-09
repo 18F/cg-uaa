@@ -21,11 +21,13 @@ public class EmailService implements MessageService {
     private JavaMailSender mailSender;
     private final String loginUrl;
     private final String brand;
+    private final String brandTitle;
 
-    public EmailService(JavaMailSender mailSender, String loginUrl, String brand) {
+    public EmailService(JavaMailSender mailSender, String loginUrl, String brand, String brandTitle) {
         this.mailSender = mailSender;
         this.loginUrl = loginUrl;
         this.brand = brand;
+        this.brandTitle = brandTitle;
     }
 
     public JavaMailSender getMailSender() {
@@ -40,7 +42,7 @@ public class EmailService implements MessageService {
         String host = UriComponentsBuilder.fromHttpUrl(loginUrl).build().getHost();
         String name = null;
         if (IdentityZoneHolder.get().equals(IdentityZone.getUaa())) {
-            name = brand.equals("pivotal") ? "Pivotal" : "Cloud Foundry";
+            name = brand.equals("pivotal") ? "Pivotal" : ((brandTitle == null) ? "Cloud Foundry" : brandTitle);
         } else {
             name = IdentityZoneHolder.get().getName();
         }

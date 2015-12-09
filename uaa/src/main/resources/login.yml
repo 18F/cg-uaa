@@ -54,6 +54,9 @@ login:
   # the brand to use for password reset emails and page titles
   # (defaults to oss)
   #brand: pivotal
+  # the brand title text
+  # (defaults to null)
+  #brandTitle:
   #base URL that the login server can be reached at
   url: http://localhost:8080/uaa
 

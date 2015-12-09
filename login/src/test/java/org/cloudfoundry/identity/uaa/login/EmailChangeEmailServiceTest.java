@@ -94,7 +94,7 @@ public class EmailChangeEmailServiceTest {
         clientDetailsService = mock(ClientDetailsService.class);
         messageService = mock(EmailService.class);
         uaaUrlUtils = new UaaUrlUtils("http://uaa.example.com/uaa");
-        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, scimUserProvisioning, uaaUrlUtils, "pivotal", codeStore, clientDetailsService);
+        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, scimUserProvisioning, uaaUrlUtils, "pivotal", null, codeStore, clientDetailsService);
 
         request = new MockHttpServletRequest();
         request.setProtocol("http");
@@ -126,7 +126,7 @@ public class EmailChangeEmailServiceTest {
 
     @Test
     public void testBeginEmailChangeWithOssBrand() throws Exception {
-        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, scimUserProvisioning, uaaUrlUtils, "oss", codeStore, clientDetailsService);
+        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, scimUserProvisioning, uaaUrlUtils, "oss", null, codeStore, clientDetailsService);
 
         setUpForBeginEmailChange();
 
@@ -143,6 +143,30 @@ public class EmailChangeEmailServiceTest {
         assertThat(emailBody, containsString("<a href=\"http://uaa.example.com/uaa/verify_email?code=the_secret_code\">Verify your email</a>"));
         assertThat(emailBody, containsString("an account"));
         assertThat(emailBody, containsString("Cloud Foundry"));
+        assertThat(emailBody, not(containsString("a Pivotal ID")));
+    }
+
+    @Test
+    public void testBeginEmailChangeWithOssBrandWithBrandTitle() throws Exception {
+        String brandTitle = "Custom Brand";
+        emailChangeEmailService = new EmailChangeEmailService(templateEngine, messageService, scimUserProvisioning, uaaUrlUtils, "oss", brandTitle, codeStore, clientDetailsService);
+
+        setUpForBeginEmailChange();
+
+        ArgumentCaptor<String> emailBodyArgument = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(messageService).sendMessage(
+                eq("new@example.com"),
+                eq(MessageType.CHANGE_EMAIL),
+                eq("Account Email change verification"),
+                emailBodyArgument.capture()
+        );
+
+        String emailBody = emailBodyArgument.getValue();
+
+        assertThat(emailBody, containsString("<a href=\"http://uaa.example.com/uaa/verify_email?code=the_secret_code\">Verify your email</a>"));
+        assertThat(emailBody, containsString("an account"));
+        assertThat(emailBody, containsString(brandTitle));
+        assertThat(emailBody, not(containsString("Cloud Foundry")));
         assertThat(emailBody, not(containsString("a Pivotal ID")));
     }
 

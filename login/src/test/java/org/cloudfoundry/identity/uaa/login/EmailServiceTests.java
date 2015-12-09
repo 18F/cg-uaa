@@ -23,7 +23,7 @@ public class EmailServiceTests {
 
     @Test
     public void testSendOssMimeMessage() throws Exception {
-        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", "oss");
+        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", "oss", null);
 
         emailService.sendMessage("user@example.com", MessageType.CHANGE_EMAIL, "Test Message", "<html><body>hi</body></html>");
 
@@ -39,8 +39,26 @@ public class EmailServiceTests {
     }
 
     @Test
+    public void testSendOssMimeMessageWithBrandTitle() throws Exception {
+        String brandTitle = "Custom Brand";
+        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", "oss", brandTitle);
+
+        emailService.sendMessage("user@example.com", MessageType.CHANGE_EMAIL, "Test Message", "<html><body>hi</body></html>");
+
+        assertThat(mailSender.getSentMessages(), hasSize(1));
+        FakeJavaMailSender.MimeMessageWrapper mimeMessageWrapper = mailSender.getSentMessages().get(0);
+        assertThat(mimeMessageWrapper.getFrom(), hasSize(1));
+        InternetAddress fromAddress = (InternetAddress) mimeMessageWrapper.getFrom().get(0);
+        assertThat(fromAddress.getAddress(), equalTo("admin@login.example.com"));
+        assertThat(fromAddress.getPersonal(), equalTo(brandTitle));
+        assertThat(mimeMessageWrapper.getRecipients(Message.RecipientType.TO), hasSize(1));
+        assertThat(mimeMessageWrapper.getRecipients(Message.RecipientType.TO).get(0), equalTo((Address) new InternetAddress("user@example.com")));
+        assertThat(mimeMessageWrapper.getContentString(), equalTo("<html><body>hi</body></html>"));
+    }
+
+    @Test
     public void testSendPivotalMimeMessage() throws Exception {
-        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", "pivotal");
+        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", "pivotal", null);
 
         emailService.sendMessage("user@example.com", MessageType.CHANGE_EMAIL, "Test Message", "<html><body>hi</body></html>");
 
@@ -48,6 +66,21 @@ public class EmailServiceTests {
         assertThat(mimeMessageWrapper.getFrom(), hasSize(1));
         InternetAddress fromAddress = (InternetAddress) mimeMessageWrapper.getFrom().get(0);
         assertThat(fromAddress.getAddress(), equalTo("admin@login.example.com"));
+        assertThat(fromAddress.getPersonal(), equalTo("Pivotal"));
+    }
+
+    @Test
+    public void testSendPivotalMimeMessageWithBrandTitle() throws Exception {
+        String brandTitle = "Custom Brand";
+        EmailService emailService = new EmailService(mailSender, "http://login.example.com/login", "pivotal", brandTitle);
+
+        emailService.sendMessage("user@example.com", MessageType.CHANGE_EMAIL, "Test Message", "<html><body>hi</body></html>");
+
+        FakeJavaMailSender.MimeMessageWrapper mimeMessageWrapper = mailSender.getSentMessages().get(0);
+        assertThat(mimeMessageWrapper.getFrom(), hasSize(1));
+        InternetAddress fromAddress = (InternetAddress) mimeMessageWrapper.getFrom().get(0);
+        assertThat(fromAddress.getAddress(), equalTo("admin@login.example.com"));
+        // Should stay from 'Pivotal'
         assertThat(fromAddress.getPersonal(), equalTo("Pivotal"));
     }
 }

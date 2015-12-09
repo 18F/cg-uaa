@@ -199,7 +199,7 @@ public class EmailInvitationsServiceTests {
 
         @Bean
         EmailInvitationsService emailInvitationsService() {
-            return new EmailInvitationsService(templateEngine, messageService(), "pivotal");
+            return new EmailInvitationsService(templateEngine, messageService(), "pivotal", null);
         }
 
         @Bean
