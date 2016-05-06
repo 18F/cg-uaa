@@ -18,6 +18,7 @@
             <input type="submit" value="Sign in" class="island-button"/>
         </form>
         </th:block>
+        <!--
         <div class="saml-login">
             <p th:if="${showLoginLinks==true and fieldUsernameShow}">or Sign in with: </p>
             <div th:each="idp : ${idpDefinitions}" th:if="${idp.showSamlLink}">
@@ -32,6 +33,7 @@
                 </div>
             </div>
         </div>
+        -->
         <th:block th:if="${linkCreateAccountShow} and not ${disableInternalUserManagement}">
         <span class="left">
             <a th:unless="${#strings.isEmpty(links['createAccountLink'])}" href="/create_account" th:href="@{${links['createAccountLink']}}" class="link-lowlight">Create account</a>
